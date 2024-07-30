@@ -1,0 +1,70 @@
+#include <vector>
+#include <queue>
+#include <limits>
+//#include <iostream>
+
+template <typename T>
+class Graph {
+public:
+    using AdjacencyList = std::vector<std::vector<std::pair<int, T>>>;
+    AdjacencyList adjList;
+
+    Graph(int nodes) : adjList(nodes) {}
+
+    void addEdge(int from, int to, T weight) {
+        adjList[from].emplace_back(to, weight);
+    }
+
+    std::vector<T> dijkstra(int startNode) const {
+        int n = adjList.size();
+        std::vector<T> minCosts(n, std::numeric_limits<T>::max());
+        minCosts[startNode] = static_cast<T>(0);
+
+        using P = std::pair<T, int>;
+        std::priority_queue<P, std::vector<P>, std::greater<P>> pq;
+        pq.push({0, startNode});
+
+        while (!pq.empty()) {
+            T currentCost = pq.top().first;
+            int currentNode = pq.top().second;
+            pq.pop();
+
+            if (currentCost > minCosts[currentNode])
+                continue;
+
+            for (const auto& [neighbor, weight] : adjList[currentNode]) {
+                T newCost = currentCost + weight;
+                if (newCost < minCosts[neighbor]) {
+                    minCosts[neighbor] = newCost;
+                    pq.push({newCost, neighbor});
+                }
+            }
+        }
+
+        return minCosts;
+    }
+};
+
+// test
+//int main() {
+//    Graph<int> graph(4);
+//
+//    graph.addEdge(0, 1, 4);
+//    graph.addEdge(0, 2, 1);
+//    graph.addEdge(1, 3, 1);
+//    graph.addEdge(2, 1, 2);
+//    graph.addEdge(2, 3, 5);
+//
+//    int startNode = 0;
+//    std::vector<int> result = graph.dijkstra(startNode);
+//
+//    for (int i = 0; i < result.size(); i++) {
+//        if (result[i] == std::numeric_limits<int>::max()) {
+//            std::cout << "Node " << i << " is unreachable from node " << startNode << std::endl;
+//        } else {
+//            std::cout << "Minimum cost to node " << i << " is " << result[i] << std::endl;
+//        }
+//    }
+//
+//    return 0;
+//}
